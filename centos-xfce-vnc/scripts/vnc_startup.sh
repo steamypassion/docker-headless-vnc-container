@@ -25,8 +25,8 @@ do
 case $i in
     # if option `-t` or `--tail-log` block the execution and tail the VNC log
     -t|--tail-log)
-    echo -e "\n------------------ /root/.vnc/*$DISPLAY.log ------------------"
-    tail -f /root/.vnc/*$DISPLAY.log
+    echo -e "\n------------------ /sakuli/.vnc/*$DISPLAY.log ------------------"
+    tail -f /sakuli/.vnc/*$DISPLAY.log
     ;;
     *)
     # unknown option ==> call command

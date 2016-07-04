@@ -8,7 +8,7 @@ ENV REFRESHED_AT 2016-06-01
 ENV JAVA_VERSION 8u92
 
 ENV DISPLAY :1
-ENV NO_VNC_HOME /root/noVNC
+ENV NO_VNC_HOME /sakuli/noVNC
 ENV VNC_COL_DEPTH 24
 ENV VNC_RESOLUTION 1280x1024
 ENV VNC_PW vncpassword
@@ -23,8 +23,8 @@ RUN yum -y install tigervnc-server wget net-tools
 ### Install noVNC - HTML5 based VNC viewer
 RUN mkdir -p $NO_VNC_HOME/utils/websockify \
     && wget -qO- https://github.com/ConSol/noVNC/archive/consol_1.0.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
-    &&  wget -qO- https://github.com/kanaka/websockify/archive/v0.7.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME/utils/websockify \
-    && chmod +x -v /root/noVNC/utils/*.sh
+    && wget -qO- https://github.com/kanaka/websockify/archive/v0.7.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME/utils/websockify \
+    && chmod +x -v $NO_VNC_HOME/utils/*.sh
 
 ### Install firefox chrome browser
 ADD repos /etc/yum.repos.d/
@@ -42,12 +42,24 @@ EXPOSE 5901
 # novnc web port
 EXPOSE 6901
 
-ADD .vnc /root/.vnc
-ADD .config /root/.config
-ADD Desktop /root/Desktop
-ADD scripts /root/scripts
-RUN chmod +x  /root/scripts/*.sh /root/.vnc/xstartup /etc/xdg/xfce4/xinitrc /root/Desktop/*.desktop
+RUN groupadd -r sakuli -g 433 && \
+    useradd -u 431 -r -g sakuli -d /sakuli -s /sbin/nologin -c "Sakuli user" sakuli && \
+    chown -R sakuli:sakuli /sakuli && \
+    chmod -R go+rw /sakuli
+
+ENV HOME /sakuli
+
+ADD .vnc /sakuli/.vnc
+ADD .config /sakuli/.config
+ADD Desktop /sakuli/Desktop
+ADD scripts /sakuli/scripts
+RUN chmod +x /sakuli/scripts/*.sh /sakuli/.vnc/xstartup /etc/xdg/xfce4/xinitrc /sakuli/Desktop/*.desktop && \
+    chown -R sakuli:sakuli /sakuli && chown -R sakuli:sakuli /sakuli && \
+    chmod -R ug+rw /sakuli
+
 RUN /bin/dbus-uuidgen > /etc/machine-id
 
-ENTRYPOINT ["/root/scripts/vnc_startup.sh"]
+USER sakuli
+
+ENTRYPOINT ["/sakuli/scripts/vnc_startup.sh"]
 CMD ["--tail-log"]
