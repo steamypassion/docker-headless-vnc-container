@@ -16,10 +16,10 @@ ENV VNC_PW vncpassword
 ENV SAKULI_DOWNLOAD_URL https://labs.consol.de/sakuli/install
 
 ############### xvnc / xfce installation
-RUN yum -y install epel-release && yum -y update && yum -y install sudo && yum clean all
+RUN yum -y install epel-release && yum -y update && yum -y install sudo && yum clean all -y
 RUN yum --enablerepo=epel -y -x gnome-keyring --skip-broken groups install "Xfce"
-RUN yum -y groups install "Fonts"
-RUN yum -y install tigervnc-server wget net-tools
+RUN yum -y groups install "Fonts" && yum clean all -y
+RUN yum -y install tigervnc-server wget net-tools && yum clean all -y
 ### Install noVNC - HTML5 based VNC viewer
 RUN mkdir -p $NO_VNC_HOME/utils/websockify \
     && wget -qO- https://github.com/ConSol/noVNC/archive/consol_1.0.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
@@ -30,10 +30,11 @@ RUN mkdir -p $NO_VNC_HOME/utils/websockify \
 ADD repos /etc/yum.repos.d/
 RUN yum -y install firefox google-chrome-stable \
     && echo "alias google-chrome='/usr/bin/google-chrome --user-data-dir'" >> /root/.bashrc \
-    && echo "alias google-chrome='/usr/bin/google-chrome -no-default-browser-check --user-data-dir'" >> /etc/bashrc
+    && echo "alias google-chrome='/usr/bin/google-chrome -no-default-browser-check --user-data-dir'" >> /etc/bashrc \
+    && yum clean all -y
 
 ### Install java and java-plugin
-RUN yum -y install $SAKULI_DOWNLOAD_URL/3rd-party/java/jre-$JAVA_VERSION-linux-x64.rpm
+RUN yum -y install $SAKULI_DOWNLOAD_URL/3rd-party/java/jre-$JAVA_VERSION-linux-x64.rpm && yum clean all -y
 # creat symbolic link for firefox java plugin
 RUN ln -s /usr/java/default/lib/amd64/libnpjp2.so /usr/lib64/mozilla/plugins/
 
