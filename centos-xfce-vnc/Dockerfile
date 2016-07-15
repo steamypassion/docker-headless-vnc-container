@@ -19,7 +19,7 @@ ENV SAKULI_DOWNLOAD_URL https://labs.consol.de/sakuli/install
 RUN yum -y install epel-release && yum -y update && yum -y install sudo && yum clean all -y
 RUN yum --enablerepo=epel -y -x gnome-keyring --skip-broken groups install "Xfce"
 RUN yum -y groups install "Fonts" && yum clean all -y
-RUN yum -y install tigervnc-server wget net-tools && yum clean all -y
+RUN yum -y install tigervnc-server wget net-tools nss_wrapper gettext && yum clean all -y
 ### Install noVNC - HTML5 based VNC viewer
 RUN mkdir -p $NO_VNC_HOME/utils/websockify \
     && wget -qO- https://github.com/ConSol/noVNC/archive/consol_1.0.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
@@ -43,10 +43,10 @@ EXPOSE 5901
 # novnc web port
 EXPOSE 6901
 
-RUN groupadd -r sakuli -g 433 && \
-    useradd -u 431 -r -g sakuli -d /sakuli -s /sbin/nologin -c "Sakuli user" sakuli && \
-    chown -R sakuli:sakuli /sakuli && \
-    chmod -R go+rw /sakuli
+#RUN groupadd -r sakuli -g 433 && \
+#    useradd -u 431 -r -g sakuli -d /sakuli -s /sbin/nologin -c "Sakuli user" sakuli && \
+#    chown -R sakuli:sakuli /sakuli && \
+#    chmod -R go+rw /sakuli
 
 ENV HOME /sakuli
 
@@ -54,13 +54,16 @@ ADD .vnc /sakuli/.vnc
 ADD .config /sakuli/.config
 ADD Desktop /sakuli/Desktop
 ADD scripts /sakuli/scripts
-RUN chmod +x /sakuli/scripts/*.sh /sakuli/.vnc/xstartup /etc/xdg/xfce4/xinitrc /sakuli/Desktop/*.desktop && \
-    chown -R sakuli:sakuli /sakuli && chown -R sakuli:sakuli /sakuli && \
-    chmod -R ug+rw /sakuli
+ADD passwd.template /sakuli/passwd.template
+
+RUN chmod +x /sakuli/scripts/*.sh /sakuli/.vnc/xstartup /etc/xdg/xfce4/xinitrc /sakuli/Desktop/*.desktop 
+RUN chgrp -R 0 /sakuli
+RUN chmod -R g+rw /sakuli
+RUN find /sakuli -type d -exec chmod g+x {} +
 
 RUN /bin/dbus-uuidgen > /etc/machine-id
 
-USER sakuli
+USER 1984
 
 ENTRYPOINT ["/sakuli/scripts/vnc_startup.sh"]
 CMD ["--tail-log"]

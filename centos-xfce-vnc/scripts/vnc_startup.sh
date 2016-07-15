@@ -1,5 +1,12 @@
 #!/bin/bash
 
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+envsubst < /sakuli/passwd.template > /tmp/passwd
+export LD_PRELOAD=libnss_wrapper.so
+export NSS_WRAPPER_PASSWD=/tmp/passwd
+export NSS_WRAPPER_GROUP=/etc/group
+
 #resolve_vnc_connection
 VNC_IP=$(ip addr show eth0 | grep -Po 'inet \K[\d.]+')
 VNC_PORT="590"${DISPLAY:1}
