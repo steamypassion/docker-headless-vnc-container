@@ -3,7 +3,7 @@
 FROM centos:7
 
 MAINTAINER Tobias Schneck "tobias.schneck@consol.de"
-ENV REFRESHED_AT 2016-06-01
+ENV REFRESHED_AT 2016-07-16
 
 LABEL io.k8s.description="Headless VNC Container with xfce, firefox, chrome" \
       io.k8s.display-name="Headless VNC Container" \
@@ -25,7 +25,7 @@ ENV SAKULI_DOWNLOAD_URL https://labs.consol.de/sakuli/install
 RUN yum -y install epel-release && yum -y update && yum -y install sudo && yum clean all -y
 RUN yum --enablerepo=epel -y -x gnome-keyring --skip-broken groups install "Xfce"
 RUN yum -y groups install "Fonts" && yum clean all -y
-RUN yum -y install tigervnc-server wget net-tools nss_wrapper gettext && yum clean all -y
+RUN yum -y install tigervnc-server wget net-tools nss_wrapper gettext which && yum clean all -y
 ### Install noVNC - HTML5 based VNC viewer
 RUN mkdir -p $NO_VNC_HOME/utils/websockify \
     && wget -qO- https://github.com/ConSol/noVNC/archive/consol_1.0.0.tar.gz | tar xz --strip 1 -C $NO_VNC_HOME \
@@ -34,10 +34,11 @@ RUN mkdir -p $NO_VNC_HOME/utils/websockify \
 
 ### Install firefox chrome browser
 ADD repos /etc/yum.repos.d/
-RUN yum -y install firefox google-chrome-stable \
-    && echo "alias google-chrome='/usr/bin/google-chrome --user-data-dir'" >> /root/.bashrc \
-    && echo "alias google-chrome='/usr/bin/google-chrome -no-default-browser-check --user-data-dir'" >> /etc/bashrc \
-    && yum clean all -y
+RUN yum -y install firefox google-chrome-stable && yum clean all -y
+# add `--no-sandbox` to be able to start chrome inside of the docker container
+RUN rm -f /etc/alternatives/google-chrome \
+    && echo '/usr/bin/google-chrome-stable --no-sandbox --start-maximized --user-data-dir "$@"' > /etc/alternatives/google-chrome \
+    && chmod +x /etc/alternatives/google-chrome
 
 ### Install java and java-plugin
 RUN yum -y install $SAKULI_DOWNLOAD_URL/3rd-party/java/jre-$JAVA_VERSION-linux-x64.rpm && yum clean all -y
