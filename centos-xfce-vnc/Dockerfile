@@ -5,6 +5,12 @@ FROM centos:7
 MAINTAINER Tobias Schneck "tobias.schneck@consol.de"
 ENV REFRESHED_AT 2016-06-01
 
+LABEL io.k8s.description="Headless VNC Container with xfce, firefox, chrome" \
+      io.k8s.display-name="Headless VNC Container" \
+      io.openshift.expose-services="6901:http,5901:xvnc" \
+      io.openshift.tags="vnc, sakuli" \
+      io.openshift.non-scalable=true
+
 ENV JAVA_VERSION 8u92
 
 ENV DISPLAY :1
@@ -56,7 +62,7 @@ ADD Desktop /sakuli/Desktop
 ADD scripts /sakuli/scripts
 ADD passwd.template /sakuli/passwd.template
 
-RUN chmod +x /sakuli/scripts/*.sh /sakuli/.vnc/xstartup /etc/xdg/xfce4/xinitrc /sakuli/Desktop/*.desktop 
+RUN chmod +x /sakuli/scripts/*.sh /sakuli/.vnc/xstartup /etc/xdg/xfce4/xinitrc /sakuli/Desktop/*.desktop
 RUN chgrp -R 0 /sakuli
 RUN chmod -R g+rw /sakuli
 RUN find /sakuli -type d -exec chmod g+x {} +
