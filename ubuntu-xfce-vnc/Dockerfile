@@ -48,6 +48,8 @@ RUN mkdir -p $JAVA_HOME \
 EXPOSE 5901
 # novnc web port
 EXPOSE 6901
+EXPOSE 7901
+
 
 ADD .vnc /root/.vnc
 ADD .config /root/.config
